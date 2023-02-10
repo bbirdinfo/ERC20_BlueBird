@@ -1,17 +1,7 @@
-Per il deploy: 
- - mettere in env
- - mettere in env le password necessarie
- - mettere in env la key di polygonscan
-
-TODO: 
- - readme
- - deploy
- - git proget
-
 # BlueBird
 This folder is refered to BlueBird (BBD) ERC20. 
-The contract are update form the address `0x` to:
- - Test Mumbai: `0x`
+The contract are update form the address `0xBc6107fAcc388290833AB411CBa71D83BB9f3c93` to:
+ - Test Mumbai: `0x033Dc83A2a1de03252480D078A1C155c5f78ebBE`
  - Polygon Mainnet: `0x`
 
 ## Mint & distribution

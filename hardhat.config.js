@@ -16,14 +16,14 @@ module.exports = {
   networks:{
     hardhat: {
       chainId: 31337,
-      // gasPrice: 130000000000,
-      UNPREDICTABLE_GAS_LIMIT:true
+      // gasPrice: 130000000000
     },
     mumbai:{
       url: MUMBAI_RPC_URL,
       accounts: [PRIVATE_KEY],
       chainId: 80001,
       blockConfermation: 6,
+      allowUnlimitedContractSize: true,
       callbackGasLimit: "500000"
     },
     polygon:{

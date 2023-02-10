@@ -18,26 +18,21 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
     //const BlueBird = await ethers.getContractFactory("BlueBird")
     //const proxy = await upgrades.deployProxy(BlueBird, [42], { initializer: 'store' })
+    
     log("----------------------------------------------------")
     log("Deploying BlueBird and waiting for confirmations...")
     const token = await deploy("BlueBird", {
         from: deployer,
-        args: [],
+        args: [maticUsdPriceFeedAddress],
         log: true,
         // we need to wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
     })
-
-    const contract = await ethers.getContract("BlueBird")
-
-    // inizilize
-    await contract.initialize(maticUsdPriceFeedAddress);
-    
     log(`BlueBird deployed at ${token.address}`)
-    log(`BlueBird initialized`)
     
     if (!developmentChain.includes(network.name) && process.env.POLYGONSCAN_API_KEY) {
-        await verify(token.address, [maticUsdPriceFeedAddress])        
+        await verify(token.address, [maticUsdPriceFeedAddress])
+
     }
 }
 

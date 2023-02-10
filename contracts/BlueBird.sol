@@ -119,9 +119,9 @@ contract BlueBird is ERC20, ERC20Burnable {
     function mintFromMatic() external payable checkBalance(address(msg.sender).balance,msg.value){
         uint value1 = msg.value;
         uint mintPrice;
-        if(minter4minted["ecosystem"]<getCap()*25/100){
+        if(minter4minted["ecosystem"]<getCap()*25/100/1e18){
             mintPrice = mintTokenAmount(0);
-        } else if (minter4minted["ecosystem"]<getCap()*15/100+getCap()*25/100){
+        } else if (minter4minted["ecosystem"]<getCap()*15/100/1e18+getCap()*25/100/1e18){
             mintPrice = mintTokenAmount(1);
         } else {
             mintPrice = mintTokenAmount(2);

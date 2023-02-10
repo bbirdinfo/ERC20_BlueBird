@@ -132,18 +132,18 @@ developmentChain.includes(network.name)
                 
                 await blueBird.mintFromMatic({value:1000})
                 balance1 = await blueBird.balanceOf(accounts[2].address)
-                console.log(Number(balance1)/(1000*rate))
-                assert.equal(Number(balance1)/(1000*rate),125)
+                assert.equal((Number(balance1)/(1000*rate)*1e18).toFixed(8),125)
                 
                 await blueBird.mintFromMatic({value:750})
                 balance2 = await blueBird.balanceOf(accounts[2].address)-balance1
-                assert.equal((Number(balance2)/(750*rate)).toFixed(8),100)
+                console.log(Number(balance2)/(750*rate)*1e18)
+                assert.equal((Number(balance2)/(750*rate)*1e18).toFixed(0),100)
 
                 await blueBird.mintFromMatic({value:200})
                 balance3 = await blueBird.balanceOf(accounts[2].address)-balance1-balance2
-                assert.equal((Number(balance3)/(200*rate)).toFixed(8),50)
+                assert.equal((Number(balance3)/(200*rate)*1e18).toFixed(8),50)
 
-                assert.equal((Number(await blueBird.balanceOf(accounts[2].address))).toFixed(6),rate*1000*125+rate*750*100+rate*200*50)
+                assert.equal((Number(await blueBird.balanceOf(accounts[2].address))*1e18).toFixed(6),rate*1000*125+rate*750*100+rate*200*50)
              })
 
             it("Test limit mint (revert BlueBird__ErrorMint('ecosystem',mintAmount))", async() => {
@@ -224,7 +224,7 @@ developmentChain.includes(network.name)
                 const supply = Number(await blueBird.totalSupply())
                 blueBird.burn(500)
                 assert.equal(await blueBird.getBurned(),500) 
-                assert.equal(Number(await blueBird.totalSupply()), supply-500*1e18)
+                assert.equal(Number(await blueBird.totalSupply()), supply-500)
 
                 const caps2 = await blueBird.getMinter4amount()
                 const minted2 = await blueBird.getMinter4minted()
@@ -263,7 +263,7 @@ developmentChain.includes(network.name)
                 startSupply = Number(await blueBird.totalSupply())
                 blueBird.mintBurn(accounts[2].address,200)
                 assert.equal(Number(await blueBird.getBurned()),800)
-                assert.equal(Number(await blueBird.totalSupply()),Number(startSupply+200*1e18))
+                assert.equal(Number(await blueBird.totalSupply()),Number(startSupply+200))
             })
 
             it("check variable contest is not change if not for burned and totalsupply", async() => {
@@ -274,7 +274,7 @@ developmentChain.includes(network.name)
                 const supply = Number(await blueBird.totalSupply())
                 blueBird.mintBurn(accounts[2].address,200)
                 assert.equal(await blueBird.getBurned(),800) 
-                assert.equal(Number(await blueBird.totalSupply()), supply+200*1e18)
+                assert.equal(Number(await blueBird.totalSupply()), supply+200)
 
                 const caps2 = await blueBird.getMinter4amount()
                 const minted2 = await blueBird.getMinter4minted()

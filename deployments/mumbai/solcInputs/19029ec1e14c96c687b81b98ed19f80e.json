@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/proxy.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity ^0.8.0;\r\n\r\ncontract ProxyBlueBird {\r\n  address public implementation;\r\n\r\n  constructor(address _implementation) public {\r\n    implementation = _implementation;\r\n  }\r\n\r\n  function upgradeTo(address _newImplementation) public {\r\n    implementation = _newImplementation;\r\n  }\r\n\r\n  function call(bytes memory _data) public {\r\n    (bool success, ) = implementation.call(_data);\r\n    require(success, \"Call to implementation failed.\");\r\n  }\r\n}\r\n\r\n/*\r\npragma solidity ^0.8.0;\r\n\r\nimport \"@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol\";\r\nimport \"@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol\";\r\nimport \"@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol\";\r\n\r\n// Kept for backwards compatibility with older versions of Hardhat and Truffle plugins.\r\ncontract AdminUpgradeabilityProxy is TransparentUpgradeableProxy {\r\n    constructor(address logic, bytes memory data) payable TransparentUpgradeableProxy(logic, msg.sender, data) {}\r\n}\r\n\r\n/*\r\n\r\npragma solidity ^0.8.0;\r\n\r\ncontract Proxy{\r\n    address public implementation;\r\n    address public immutable owner;\r\n\r\n\r\n    modifier onlyOwner {\r\n        require(msg.sender == owner, \"Only the owner can call this function\");\r\n        _;\r\n    }\r\n\r\n    constructor(address _implementation) {\r\n        owner = msg.sender;\r\n        implementation = _implementation;\r\n    }\r\n\r\n    function upgradeTo(address _implementation) public onlyOwner {\r\n        implementation = _implementation;\r\n    }\r\n\r\n    function execute(bytes memory _data) public {\r\n        (bool success,) = address(implementation).delegatecall(_data);\r\n        require(success);\r\n    }\r\n}\r\n*/"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

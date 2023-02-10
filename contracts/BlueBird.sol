@@ -24,6 +24,7 @@ contract BlueBird is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable {
     mapping (string=>uint256) public minter4minted;
     uint8[3] private miningPrice = [125,100,50];
     AggregatorV3Interface internal priceFeed;
+    bool private initialized = false;
 
     /*--- MODIFIER ---*/
     modifier onlyOwner {
@@ -62,12 +63,18 @@ contract BlueBird is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable {
     event mintBurnEvent(address, uint);
 
     /*--- CONSTRUCTOR ---*/
-    /**
-     * @dev In the constructor are define the mint cap for each entites and the mint state
-     * @param priceFeedAdd Address AggregatorV3Interface
-     */ 
-    constructor(address priceFeedAdd){
+    constructor(){
         owner = payable(msg.sender);
+    }
+
+    /*--- FUNCTION ---*/
+
+    // INTIALIZE
+    /**
+     * @dev This function is used to make the contract upgradeable
+     */ 
+    function initialize(address priceFeedAdd) public initializer {
+        require(!initialized,"already initialized");
         minter4amount["fondationFee"] = cap*8/100;
         minter4amount["ecosystem"] = cap*58/100;
         minter4amount["marketingOinvestiment"] = cap*24/100;
@@ -79,16 +86,8 @@ contract BlueBird is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable {
         minter4minted["consulting"] = 0;
 
         priceFeed = AggregatorV3Interface(priceFeedAdd);
+        initialized = true;
         _mint(owner, cap*8/100*2/100);
-    }
-
-    /*--- FUNCTION ---*/
-
-    // INTIALIZE
-    /**
-     * @dev This function is used to make the contract upgradeable
-     */ 
-    function initialize() external initializer {
         __ERC20_init("BlueBird", "BBD");
         __ERC20Burnable_init();
     }

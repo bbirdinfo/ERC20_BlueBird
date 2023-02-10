@@ -18,12 +18,16 @@ developmentChain.includes(network.name)
             } else {
                 maticUsdPriceFeedAddress = networkConfig[chainId]["maticUsdPriceFeed"]
             }
+
         })
 
         // COSTRUTTORE: vedere che i parametri siano quelli attesi
-        describe("Constructor: initalizes the BlueBird correctly", () => {
+        describe("Constructor & initialize: initalizes the BlueBird correctly", () => {
             it("check owner", async () => {
                 assert.equal(await blueBird.getOwner(), deployer)
+            })
+            it("initialize onetime", async () => {
+                await expect(blueBird.initialize(maticUsdPriceFeedAddress)).to.be.reverted
             })
             it("check cap for line", async ()=>{
                 const caps = await blueBird.getMinter4amount()

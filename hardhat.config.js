@@ -17,6 +17,7 @@ module.exports = {
     hardhat: {
       chainId: 31337,
       // gasPrice: 130000000000,
+      UNPREDICTABLE_GAS_LIMIT:true
     },
     mumbai:{
       url: MUMBAI_RPC_URL,

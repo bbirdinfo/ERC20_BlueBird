@@ -31,6 +31,7 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 137,
       blockConfermation: 6,
+      allowUnlimitedContractSize: true,
       callbackGasLimit: "500000"
     }
   },

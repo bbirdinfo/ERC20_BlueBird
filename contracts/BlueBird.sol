@@ -25,6 +25,7 @@ contract BlueBird is ERC20, ERC20Burnable {
     mapping (string=>uint256) public minter4minted;
     uint8[3] private miningPrice = [125,100,50];
     AggregatorV3Interface internal priceFeed;
+    bool internal locked;
 
     /*--- MODIFIER ---*/
     modifier onlyOwner {
@@ -37,7 +38,7 @@ contract BlueBird is ERC20, ERC20Burnable {
         _;
     }
     modifier checkCap(uint amount){
-        if((ERC20.totalSupply()) + amount > getCap()*1e18){
+        if((ERC20.totalSupply()) + amount > cap*1e18){
             revert BlueBird__ErrorERC20Capped();
         }
         _;
@@ -47,6 +48,12 @@ contract BlueBird is ERC20, ERC20Burnable {
             revert BlueBird__ErrorBilancio();
         }
         _;
+    }
+    modifier noReentrant() {
+        require(!locked, "No re-entrancy");
+        locked = true;
+        _;
+        locked = false;
     }
 
     /*--- ERROR ---*/
@@ -69,12 +76,12 @@ contract BlueBird is ERC20, ERC20Burnable {
      */ 
     constructor(address priceFeedAdd) ERC20("BlueBird", "BBD"){
         owner = payable(msg.sender);
-        minter4amount["fondationFee"] = cap*8/100;
-        minter4amount["ecosystem"] = cap*58/100;
-        minter4amount["marketingOinvestiment"] = cap*24/100;
-        minter4amount["consulting"] = cap*10/100;
+        minter4amount["fondationFee"] = cap*8/100*1e18;
+        minter4amount["ecosystem"] = cap*58/100*1e18;
+        minter4amount["marketingOinvestiment"] = cap*24/100*1e18;
+        minter4amount["consulting"] = cap*10/100*1e18;
 
-        minter4minted["fondationFee"] = cap*8/100*2/100;
+        minter4minted["fondationFee"] = cap*8/100*2/100*1e18;
         minter4minted["ecosystem"] = 0;
         minter4minted["marketingOinvestiment"] = 0;
         minter4minted["consulting"] = 0;
@@ -104,8 +111,8 @@ contract BlueBird is ERC20, ERC20Burnable {
      * @param _amount The number of token will sent to the account
      * @param typeMining In base of the type choose between: fondationFee, ecosystem, marketingOinvestiment and developing
      */ 
-    function mintDirectly(address account, uint256 _amount, string memory typeMining) public onlyOwner checkMint(typeMining,_amount) {
-        minter4minted[typeMining] = minter4minted[typeMining]+_amount;
+    function mintDirectly(address account, uint256 _amount, string memory typeMining) public onlyOwner checkMint(typeMining,_amount*1e18) {
+        minter4minted[typeMining] = minter4minted[typeMining]+_amount*1e18;
         _mint(account,_amount*1e18);
         emit mintDirectlyEvent(account, _amount, typeMining);
     }
@@ -116,24 +123,28 @@ contract BlueBird is ERC20, ERC20Burnable {
      */ 
     // NB: il prezzo di mint dipende dal prezzo a cui si è arrivati nel momento del mint, 
     //      se un acquisto dovesse andare a cavallo su due 2 fasce di prezzo viene presa quella inferiore
-    function mintFromMatic() external payable checkBalance(address(msg.sender).balance,msg.value){
+    function mintFromMatic() external payable checkBalance(address(msg.sender).balance,msg.value) noReentrant(){
         uint value1 = msg.value;
         uint mintPrice;
-        if(minter4minted["ecosystem"]<getCap()*25/100/1e18){
+        if(minter4minted["ecosystem"]<(cap*25/100*1e18)){
             mintPrice = mintTokenAmount(0);
-        } else if (minter4minted["ecosystem"]<getCap()*15/100/1e18+getCap()*25/100/1e18){
+        } else if (minter4minted["ecosystem"]< ((cap*15/100)*1e18 + (cap*25/100)*1e18)){
             mintPrice = mintTokenAmount(1);
         } else {
             mintPrice = mintTokenAmount(2);
         }
+        uint valueMint = mintPrice*value1/1e18;
+
+        if(minter4minted["ecosystem"] + mintPrice > minter4amount["ecosystem"]){
+            revert BlueBird__ErrorMint("ecosystem",mintPrice/1e18);
+        }
+        minter4minted["ecosystem"] = minter4minted["ecosystem"]+valueMint*1e18;
         (bool callSuccess,) = owner.call{value: msg.value}('');
         if(!callSuccess){
             revert BlueBird__ErrorCall();
         }
-
-        uint valueMint = mintPrice*value1/1e18;
-        minter4minted["ecosystem"] = minter4minted["ecosystem"]+uint(valueMint);
         _mint(msg.sender,valueMint);
+
         emit mintFromMaticEvent(msg.sender, valueMint/1e18, mintPrice);
 
     }
@@ -146,9 +157,6 @@ contract BlueBird is ERC20, ERC20Burnable {
         uint maticUsd = uint256(answer * 10000000000);
         uint price = miningPrice[n];
         uint mintPrice = maticUsd*price;
-        if(minter4minted["ecosystem"]*1e18+ mintPrice > minter4amount["ecosystem"]*1e18){
-            revert BlueBird__ErrorMint("ecosystem",mintPrice/1e18);
-        }
         return mintPrice;
     }
 

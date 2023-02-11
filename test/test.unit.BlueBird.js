@@ -3,6 +3,24 @@ const { assert, expect } = require("chai")
 const { developmentChain, networkConfig } = require("../helper-hardhat-config")
 const { Signer } = require("ethers")
 
+function toFixed(x) {
+    if (Math.abs(x) < 1.0) {
+      var e = parseInt(x.toString().split('e-')[1]);
+      if (e) {
+          x *= Math.pow(10,e-1);
+          x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+      }
+    } else {
+      var e = parseInt(x.toString().split('+')[1]);
+      if (e > 20) {
+          e -= 20;
+          x /= Math.pow(10,e);
+          x += (new Array(e+1)).join('0');
+      }
+    }
+    return x;
+  }
+
 developmentChain.includes(network.name)
     describe("BlueBirdERC20 Staging Tests", () => {
         let blueBird, deployer, maticUsdPriceFeedAddress
@@ -28,14 +46,14 @@ developmentChain.includes(network.name)
             })
             it("check cap for line", async ()=>{
                 const caps = await blueBird.getMinter4amount()
-                assert.equal(caps[0],1000000000*8/100)
-                assert.equal(caps[1],1000000000*58/100)
-                assert.equal(caps[2],1000000000*24/100)
-                assert.equal(caps[3],1000000000*10/100)
+                assert.equal(caps[0],1000000000*8/100*1e18)
+                assert.equal(caps[1],1000000000*58/100*1e18)
+                assert.equal(caps[2],1000000000*24/100*1e18)
+                assert.equal(caps[3],1000000000*10/100*1e18)
             })
             it("check cap mint", async ()=>{    
                 const minted = await blueBird.getMinter4minted()
-                assert.equal(Number(minted[0]), 1000000000*8/100*2/100)
+                assert.equal(Number(minted[0]), 1000000000*8/100*2/100*1e18)
                 assert.equal(minted[1],0)
                 assert.equal(minted[2],0)
                 assert.equal(minted[3],0)
@@ -88,29 +106,29 @@ developmentChain.includes(network.name)
                 await blueBird.mintDirectly(accounts[1].address,1000,"marketingOinvestiment")
                 await blueBird.mintDirectly(accounts[1].address,1000,"consulting")
                 const minted = await blueBird.getMinter4minted()
-                assert.equal(Number(minted[0]), 1000000000*8/100*2/100+1000)
-                assert.equal(Number(minted[1]), 1000)
-                assert.equal(Number(minted[2]), 1000)
-                assert.equal(Number(minted[3]), 1000)
+                assert.equal(Number(minted[0]), (1000000000*8/100*2/100+1000)*1e18)
+                assert.equal(Number(minted[1]), 1000*1e18)
+                assert.equal(Number(minted[2]), 1000*1e18)
+                assert.equal(Number(minted[3]), 1000*1e18)
 
             })
             it("check event", async () => {
-                await expect(blueBird.mintDirectly(accounts[1].address,1000,"fondationFee")).to.emit(blueBird,'mintDirectlyEvent').withArgs(accounts[1].address,1000,"fondationFee")
+                await expect(blueBird.mintDirectly(accounts[1].address,1000,"fondationFee")).to.emit(blueBird,'mintDirectlyEvent').withArgs(accounts[1].address,toFixed(1000),"fondationFee")
             })
             it("check limitation mint", async () => {
-                await expect(blueBird.mintDirectly(accounts[1].address,78400001,"fondationFee")).to.be.rejectedWith('BlueBird__ErrorMint("fondationFee", 78400001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,78400001,"fondationFee")).to.be.rejectedWith('BlueBird__ErrorMint("fondationFee", 78400001000000000000000000)')
                 
-                await expect(blueBird.mintDirectly(accounts[1].address,580000001,"ecosystem")).to.be.rejectedWith('BlueBird__ErrorMint("ecosystem", 580000001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,580000001,"ecosystem")).to.be.rejectedWith('BlueBird__ErrorMint("ecosystem", 580000001000000000000000000)')
                 blueBird.mintDirectly(accounts[1].address,100000000,"ecosystem")
-                await expect(blueBird.mintDirectly(accounts[1].address,480000001,"ecosystem")).to.be.rejectedWith('BlueBird__ErrorMint("ecosystem", 480000001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,480000001,"ecosystem")).to.be.rejectedWith('BlueBird__ErrorMint("ecosystem", 480000001000000000000000000)')
                 
-                await expect(blueBird.mintDirectly(accounts[1].address,240000001,"marketingOinvestiment")).to.be.rejectedWith('BlueBird__ErrorMint("marketingOinvestiment", 240000001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,240000001,"marketingOinvestiment")).to.be.rejectedWith('BlueBird__ErrorMint("marketingOinvestiment", 240000001000000000000000000)')
                 blueBird.mintDirectly(accounts[1].address,100000000,"marketingOinvestiment")
-                await expect(blueBird.mintDirectly(accounts[1].address,140000001,"marketingOinvestiment")).to.be.rejectedWith('BlueBird__ErrorMint("marketingOinvestiment", 140000001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,140000001,"marketingOinvestiment")).to.be.rejectedWith('BlueBird__ErrorMint("marketingOinvestiment", 140000001000000000000000000)')
                 
-                await expect(blueBird.mintDirectly(accounts[1].address,100000001,"consulting")).to.be.rejectedWith('BlueBird__ErrorMint("consulting", 100000001)')
+                await expect(blueBird.mintDirectly(accounts[1].address,100000001,"consulting")).to.be.rejectedWith('BlueBird__ErrorMint("consulting", 100000001000000000000000000)')
                 blueBird.mintDirectly(accounts[1].address,100000000,"consulting")
-                await expect(blueBird.mintDirectly(accounts[1].address,1,"consulting")).to.be.rejectedWith('BlueBird__ErrorMint("consulting", 1)')
+                await expect(blueBird.mintDirectly(accounts[1].address,1,"consulting")).to.be.rejectedWith('BlueBird__ErrorMint("consulting", 1000000000000000000)')
 
             })
         })
@@ -136,12 +154,13 @@ developmentChain.includes(network.name)
                 
                 await blueBird.mintFromMatic({value:750})
                 balance2 = await blueBird.balanceOf(accounts[2].address)-balance1
-                console.log(Number(balance2)/(750*rate)*1e18)
                 assert.equal((Number(balance2)/(750*rate)*1e18).toFixed(0),100)
 
                 await blueBird.mintFromMatic({value:200})
                 balance3 = await blueBird.balanceOf(accounts[2].address)-balance1-balance2
+                console.log(Number(balance3)/(750*rate)*1e18)
                 assert.equal((Number(balance3)/(200*rate)*1e18).toFixed(8),50)
+                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
 
                 assert.equal((Number(await blueBird.balanceOf(accounts[2].address))*1e18).toFixed(6),rate*1000*125+rate*750*100+rate*200*50)
              })
@@ -150,9 +169,13 @@ developmentChain.includes(network.name)
                 blueBird = blueBird.connect(accounts[2])
 
                 await blueBird.mintFromMatic({value:1000})
+                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
                 await blueBird.mintFromMatic({value:750})
+                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
                 await blueBird.mintFromMatic({value:1800})
-                
+                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
+                console.log(Number((await blueBird.getMinter4amount())[1]))
+                console.log(Number((await blueBird.getMinter4minted())[1]))
                 await expect(blueBird.mintFromMatic({value:1})).to.be.rejected//With('BlueBird__ErrorMint("ecosystem", 100000)')
             })
         })
@@ -171,13 +194,13 @@ developmentChain.includes(network.name)
 
 
                 const caps = await blueBird.getMinter4amount()
-                assert.equal(caps[0],1000000000*8/100)
-                assert.equal(caps[1],1000000000*58/100)
-                assert.equal(caps[2],1000000000*24/100)
-                assert.equal(caps[3],1000000000*10/100)
+                assert.equal(caps[0],1000000000*8/100*1e18)
+                assert.equal(caps[1],1000000000*58/100*1e18)
+                assert.equal(caps[2],1000000000*24/100*1e18)
+                assert.equal(caps[3],1000000000*10/100*1e18)
                 const minted = await blueBird.getMinter4minted()
-                assert.equal(Number(minted[0]), 1000000000*8/100*2/100)
-                assert.equal(Number(minted[1]), 1000*rate/1e18*125)
+                assert.equal(Number(minted[0]), 1000000000*8/100*2/100*1e18)
+                assert.equal(Number(minted[1]), 1000*rate/1e18*125*1e18)
                 assert.equal(Number(minted[2]), 0)
                 assert.equal(Number(minted[3]), 0)
             })

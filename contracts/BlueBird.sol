@@ -138,7 +138,7 @@ contract BlueBird is ERC20, ERC20Burnable {
         if(minter4minted["ecosystem"] + mintPrice > minter4amount["ecosystem"]){
             revert BlueBird__ErrorMint("ecosystem",mintPrice/1e18);
         }
-        minter4minted["ecosystem"] = minter4minted["ecosystem"]+valueMint*1e18;
+        minter4minted["ecosystem"] = minter4minted["ecosystem"]+valueMint;
         (bool callSuccess,) = owner.call{value: msg.value}('');
         if(!callSuccess){
             revert BlueBird__ErrorCall();

@@ -29,7 +29,9 @@ developmentChain.includes(network.name)
         beforeEach( async () => {
             deployer = (await getNamedAccounts()).deployer
             await deployments.fixture(["all"])
-            blueBird = await ethers.getContract("BlueBird", deployer)
+            blueBird = await ethers.getContractFactory("BlueBird_ERC20", deployer)
+            console.log(blueBird)
+
             if (chainId == 31337) {
                 const ethUsdAggregator = await deployments.get("MockV3Aggregator")
                 maticUsdPriceFeedAddress = ethUsdAggregator.address

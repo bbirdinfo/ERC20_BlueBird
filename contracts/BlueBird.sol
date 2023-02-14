@@ -2,8 +2,11 @@
 
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
@@ -13,32 +16,27 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @notice The contract is write for Marco Liu, creator of BlueBird project. This code had the scope to create a new token ERC20
  * @dev The contract uses openzeppeling lib
  */
-contract BlueBird is ERC20, ERC20Burnable {
+contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     /*--- COSTANTS ---*/
-    address payable private immutable owner;
-    uint private immutable cap = 1000000000;
-    bool initialized=false;
+    uint private constant cap = 1000000000;
+    bool isInitialized;
 
     /*--- VARIABLES ---*/
     uint private burned;
     mapping (string=>uint256) public minter4amount;
     mapping (string=>uint256) public minter4minted;
-    uint8[3] private miningPrice = [125,100,50];
+    uint8[3] private miningPrice;
     AggregatorV3Interface internal priceFeed;
     bool internal locked;
 
     /*--- MODIFIER ---*/
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only the owner can call this function");
-        _;
-    }
     modifier checkMint(string memory typeMining, uint _amount){
         if(minter4minted[typeMining]+_amount > minter4amount[typeMining])
             revert BlueBird__ErrorMint(typeMining, _amount);
         _;
     }
     modifier checkCap(uint amount){
-        if((ERC20.totalSupply()) + amount > cap*1e18){
+        if((ERC20Upgradeable.totalSupply()) + amount > cap*1e18){
             revert BlueBird__ErrorERC20Capped();
         }
         _;
@@ -49,6 +47,7 @@ contract BlueBird is ERC20, ERC20Burnable {
         }
         _;
     }
+    
     modifier noReentrant() {
         require(!locked, "No re-entrancy");
         locked = true;
@@ -69,13 +68,21 @@ contract BlueBird is ERC20, ERC20Burnable {
     event burnEvent(address, uint);
     event mintBurnEvent(address, uint);
 
-    /*--- CONSTRUCTOR ---*/
+    /*--- INIZIALIZE ---*/
     /**
      * @dev In the constructor are define the mint cap for each entites and the mint state
      * @param priceFeedAdd Address AggregatorV3Interface
      */ 
-    constructor(address priceFeedAdd) ERC20("BlueBird", "BBD"){
-        owner = payable(msg.sender);
+    function initialize(address priceFeedAdd) public initializer{
+        require(!isInitialized, 'Contract is already initialized!');
+        isInitialized = true;
+        __ERC20_init("BlueBird", "BBD");
+        __Ownable_init();
+        __ERC20Burnable_init();
+        __UUPSUpgradeable_init();
+
+        miningPrice = [125,100,50];
+
         minter4amount["fondationFee"] = cap*8/100*1e18;
         minter4amount["ecosystem"] = cap*58/100*1e18;
         minter4amount["marketingOinvestiment"] = cap*24/100*1e18;
@@ -86,9 +93,12 @@ contract BlueBird is ERC20, ERC20Burnable {
         minter4minted["marketingOinvestiment"] = 0;
         minter4minted["consulting"] = 0;
 
+
         priceFeed = AggregatorV3Interface(priceFeedAdd);
-        _mint(owner, cap*8/100*2/100*1e18);
+        _mint(msg.sender, cap*8/100*2/100*1e18);
     }
+
+    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
 
     /*--- FUNCTION ---*/
 
@@ -123,7 +133,7 @@ contract BlueBird is ERC20, ERC20Burnable {
      */ 
     // NB: il prezzo di mint dipende dal prezzo a cui si è arrivati nel momento del mint, 
     //      se un acquisto dovesse andare a cavallo su due 2 fasce di prezzo viene presa quella inferiore
-    function mintFromMatic() external payable checkBalance(address(msg.sender).balance,msg.value) noReentrant(){
+    function mintFromMatic() external virtual payable  noReentrant checkBalance(address(msg.sender).balance,msg.value) { //noReentrant(){
         uint value1 = msg.value;
         uint mintPrice;
         if(minter4minted["ecosystem"]<(cap*25/100*1e18)){
@@ -138,8 +148,8 @@ contract BlueBird is ERC20, ERC20Burnable {
         if(minter4minted["ecosystem"] + mintPrice > minter4amount["ecosystem"]){
             revert BlueBird__ErrorMint("ecosystem",mintPrice/1e18);
         }
-        minter4minted["ecosystem"] = minter4minted["ecosystem"]+valueMint*1e18;
-        (bool callSuccess,) = owner.call{value: msg.value}('');
+        minter4minted["ecosystem"] = minter4minted["ecosystem"]+valueMint;
+        (bool callSuccess,) = (payable (OwnableUpgradeable.owner())).call{value: msg.value}('');
         if(!callSuccess){
             revert BlueBird__ErrorCall();
         }
@@ -161,23 +171,23 @@ contract BlueBird is ERC20, ERC20Burnable {
     }
 
     /**
-     * @dev Override of ERC20
+     * @dev Override of ERC20Upgradeable
      */ 
-    function _mint(address account, uint256 amount) internal virtual override(ERC20) checkCap(amount) {
+    function _mint(address account, uint256 amount) internal virtual override(ERC20Upgradeable) checkCap(amount) {
         super._mint(account, amount);
     }
 
     // DESTROY FUNCTION
-    function destroy() public onlyOwner {
-        selfdestruct(owner);
-    }
+/*    function destroy() public onlyOwner {
+        selfdestruct((payable (OwnableUpgradeable.owner())));
+    }*/
 
     //BURN FUNCTION
     /**
      * @notice The function allows to burn tokens
      * @param amount The number of token will burn is already*1e18
      */ 
-    function burn(uint256 amount) public override(ERC20Burnable) checkBalance(balanceOf(msg.sender),amount){
+    function burn(uint256 amount) public virtual override(ERC20BurnableUpgradeable) checkBalance(balanceOf(msg.sender),amount){
         burned = burned+amount;
         _burn(msg.sender, amount);//* (10 ** decimals())
         emit burnEvent(msg.sender, amount);
@@ -188,7 +198,7 @@ contract BlueBird is ERC20, ERC20Burnable {
      * @param account The account will recieve the money
      * @param amount The number of token will sent to the account (is already *1e18)
      */ 
-    function mintBurn(address account,uint256 amount) public onlyOwner checkBalance(burned,amount){
+    function mintBurn(address account,uint256 amount) public virtual onlyOwner checkBalance(burned,amount){
         burned = burned-amount;
         _mint(account, amount);
         emit mintBurnEvent(account, amount);
@@ -198,7 +208,7 @@ contract BlueBird is ERC20, ERC20Burnable {
     /**
      * @return return the maximum capilazation
      */ 
-    function getCap() public view returns (uint256) {
+    function getCap() public virtual view returns (uint256) {
         return cap* (10 ** decimals());
     }
 
@@ -206,11 +216,11 @@ contract BlueBird is ERC20, ERC20Burnable {
      * @return return the owner of the contract
      */ 
     function getOwner() public view returns (address) {
-        return owner;
+        return OwnableUpgradeable.owner();
     }
 
     /**
-     * @return return the owner of the contract
+     * @return return 
      */ 
     function getBurned() public view returns (uint) {
         return burned;

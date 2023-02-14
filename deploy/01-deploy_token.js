@@ -21,17 +21,23 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     
     log("----------------------------------------------------")
     log("Deploying BlueBird and waiting for confirmations...")
-    const token = await deploy("BlueBird", {
+    /*const token = await deploy("BlueBird", {
         from: deployer,
         args: [maticUsdPriceFeedAddress],
         log: true,
         // we need to wait if on a live network so we can verify properly
         waitConfirmations: network.config.blockConfirmations || 1,
-    })
+    })*/
+    const blueBird = await ethers.getContractFactory("BlueBird_ERC20");
+
+    const token = await upgrades.deployProxy(blueBird, [maticUsdPriceFeedAddress], {
+      initializer: "initialize",
+    });
+    await token.deployed();
     log(`BlueBird deployed at ${token.address}`)
     
     if (!developmentChain.includes(network.name) && process.env.POLYGONSCAN_API_KEY) {
-        await verify(token.address, [maticUsdPriceFeedAddress])
+        await verify(token.address, [])
 
     }
 }

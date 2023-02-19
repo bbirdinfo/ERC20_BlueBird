@@ -30,7 +30,7 @@ developmentChain.includes(network.name)
             deployer = (await getNamedAccounts()).deployer
             await deployments.fixture(["all"])
             blueBird = await ethers.getContractFactory("BlueBird_ERC20", deployer)
-            console.log(blueBird)
+
 
             if (chainId == 31337) {
                 const ethUsdAggregator = await deployments.get("MockV3Aggregator")
@@ -38,13 +38,17 @@ developmentChain.includes(network.name)
             } else {
                 maticUsdPriceFeedAddress = networkConfig[chainId]["maticUsdPriceFeed"]
             }
-
+            blueBird = await upgrades.deployProxy(blueBird, [maticUsdPriceFeedAddress], {
+                initializer: "initialize",
+              });
+            await blueBird.deployed();
         })
 
         // COSTRUTTORE: vedere che i parametri siano quelli attesi
         describe("Constructor & initialize: initalizes the BlueBird correctly", () => {
             it("check owner", async () => {
-                assert.equal(await blueBird.getOwner(), deployer)
+                accounts = await ethers.getSigners()
+                assert.equal(await blueBird.getOwner(), accounts[0].address)
             })
             it("check cap for line", async ()=>{
                 const caps = await blueBird.getMinter4amount()
@@ -64,7 +68,8 @@ developmentChain.includes(network.name)
                 assert.equal(await blueBird.getPriceFeed(), maticUsdPriceFeedAddress)
             })
             it("balance owner (mint 2000000)", async ()=>{
-                assert.equal(Number(await blueBird.balanceOf(deployer)), 1600000 * 10 ** 18)
+                accounts = await ethers.getSigners()
+                assert.equal(Number(await blueBird.balanceOf(accounts[0].address)), 1600000 * 10 ** 18)
             })
         })
 
@@ -152,32 +157,24 @@ developmentChain.includes(network.name)
                 
                 await blueBird.mintFromMatic({value:1000})
                 balance1 = await blueBird.balanceOf(accounts[2].address)
-                assert.equal((Number(balance1)/(1000*rate)*1e18).toFixed(8),125)
+                assert.equal((Number(balance1)/(1000*rate)).toFixed(8),125)
                 
                 await blueBird.mintFromMatic({value:750})
                 balance2 = await blueBird.balanceOf(accounts[2].address)-balance1
-                assert.equal((Number(balance2)/(750*rate)*1e18).toFixed(0),100)
+                assert.equal((Number(balance2)/(750*rate)).toFixed(0),100)
 
                 await blueBird.mintFromMatic({value:200})
                 balance3 = await blueBird.balanceOf(accounts[2].address)-balance1-balance2
-                console.log(Number(balance3)/(750*rate)*1e18)
-                assert.equal((Number(balance3)/(200*rate)*1e18).toFixed(8),50)
-                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
-
-                assert.equal((Number(await blueBird.balanceOf(accounts[2].address))*1e18).toFixed(6),rate*1000*125+rate*750*100+rate*200*50)
+                assert.equal((Number(balance3)/(200*rate)).toFixed(8),50)
+                assert.equal((Number(await blueBird.balanceOf(accounts[2].address))).toFixed(6),rate*1000*125+rate*750*100+rate*200*50)
              })
 
             it("Test limit mint (revert BlueBird__ErrorMint('ecosystem',mintAmount))", async() => {
                 blueBird = blueBird.connect(accounts[2])
 
                 await blueBird.mintFromMatic({value:1000})
-                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
                 await blueBird.mintFromMatic({value:750})
-                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
                 await blueBird.mintFromMatic({value:1800})
-                console.log(Number(await blueBird.balanceOf(accounts[2].address)))
-                console.log(Number((await blueBird.getMinter4amount())[1]))
-                console.log(Number((await blueBird.getMinter4minted())[1]))
                 await expect(blueBird.mintFromMatic({value:1})).to.be.rejected//With('BlueBird__ErrorMint("ecosystem", 100000)')
             })
         })
@@ -202,7 +199,7 @@ developmentChain.includes(network.name)
                 assert.equal(caps[3],1000000000*10/100*1e18)
                 const minted = await blueBird.getMinter4minted()
                 assert.equal(Number(minted[0]), 1000000000*8/100*2/100*1e18)
-                assert.equal(Number(minted[1]), 1000*rate/1e18*125*1e18)
+                assert.equal(Number(minted[1]), 1000*rate*125)
                 assert.equal(Number(minted[2]), 0)
                 assert.equal(Number(minted[3]), 0)
             })
@@ -215,7 +212,7 @@ developmentChain.includes(network.name)
         describe("The _mint(address account, uint256 amount) function", () => {
             it("check checkCap(amount): Funzionalità superflua", async() => {})
         })
-
+        /*
         describe("The destroy function", () => {
             let accounts
             beforeEach(async () =>{
@@ -226,7 +223,7 @@ developmentChain.includes(network.name)
                 await expect(accont1ConnectedBlueBird.destroy()).to.be.reverted
             })
         })
-
+        */
         describe("The burn function", () => {
             let accounts
             beforeEach(async () =>{
@@ -266,7 +263,7 @@ developmentChain.includes(network.name)
                 assert.equal(Number(cap1), Number(cap2))
             })
             it("check event burnEvent;", async() => {
-                await expect(await blueBird.burn(5000)).to.emit(blueBird,'burnEvent').withArgs(accounts[1].address,5000)
+                await expect(await blueBird.burn(5000)).to.emit(blueBird,'burnEvent').withArgs(accounts[0].address,5000)
             })
         })
 

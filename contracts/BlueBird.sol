@@ -136,14 +136,14 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
     function mintFromMatic() external virtual payable noReentrant checkBalance(address(msg.sender).balance,msg.value) {
         uint value1 = msg.value;
         uint mintPrice;
-        if(minter4minted["ecosystem"]<(cap*25/100*1e18)){
+        if(minter4minted["ecosystem"]<(cap*1e18*25/100)){
             mintPrice = mintTokenAmount(0);
         } else if (minter4minted["ecosystem"]< ((cap*15/100)*1e18 + (cap*25/100)*1e18)){
             mintPrice = mintTokenAmount(1);
         } else {
             mintPrice = mintTokenAmount(2);
         }
-        uint valueMint = mintPrice*value1/1e18;
+        uint valueMint = mintPrice*value1;
 
         if(minter4minted["ecosystem"] + mintPrice > minter4amount["ecosystem"]){
             revert BlueBird__ErrorMint("ecosystem",mintPrice/1e18);
@@ -204,7 +204,7 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
      * @return return the maximum capilazation
      */ 
     function getCap() public virtual view returns (uint256) {
-        return cap* (10 ** decimals());
+        return cap * (10 ** decimals());
     }
 
     /**

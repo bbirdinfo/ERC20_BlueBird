@@ -55,6 +55,16 @@
       "address": "0x79CE1c499c6EcCE12F1D9eCa0905e2F41532Cd70",
       "txHash": "0xea5ef7963dd2dd5b92672d697412f9e1ca23c0f57dcdbdbd28de02b9fee10fd4",
       "kind": "uups"
+    },
+    {
+      "address": "0x2c0A39c6661c6B903c625C5c67F251eC106e8Ce6",
+      "txHash": "0x970b5f2395c58b7529afe0197aa80c8b57486470f30c7b785fdceb1b5d9910a7",
+      "kind": "uups"
+    },
+    {
+      "address": "0x82ddb0A9E7DA176c22589fc3Df5c2b1Db16B2416",
+      "txHash": "0x84608ec2d1da3951438eb7aa5135a649db549a660416f51604df170d2c404774",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -1370,6 +1380,242 @@
             "offset": 0,
             "slot": "302",
             "type": "t_uint256",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:25"
+          },
+          {
+            "label": "minter4amount",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_mapping(t_string_memory_ptr,t_uint256)",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:26"
+          },
+          {
+            "label": "minter4minted",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_mapping(t_string_memory_ptr,t_uint256)",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:27"
+          },
+          {
+            "label": "miningPrice",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_array(t_uint8)3_storage",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:28"
+          },
+          {
+            "label": "priceFeed",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_contract(AggregatorV3Interface)45",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:29"
+          },
+          {
+            "label": "locked",
+            "offset": 20,
+            "slot": "306",
+            "type": "t_bool",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:30"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)45_storage": {
+            "label": "uint256[45]",
+            "numberOfBytes": "1440"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint8)3_storage": {
+            "label": "uint8[3]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(AggregatorV3Interface)45": {
+            "label": "contract AggregatorV3Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_string_memory_ptr,t_uint256)": {
+            "label": "mapping(string => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_memory_ptr": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "2b1babcc0a5fe8ae47a45c32c35d708681ba3cba53aa3d2593afe87fda2504cf": {
+      "address": "0x21a890F69e785387E7Cc02b8342Ee7903D626682",
+      "txHash": "0xc77d5b0fa582bd8fe95f784b50fd431d955972df426f4a3aec61f680650a0b25",
+      "layout": {
+        "solcVersion": "0.8.9",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\utils\\ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:37"
+          },
+          {
+            "label": "_allowances",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:39"
+          },
+          {
+            "label": "_totalSupply",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_uint256",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:41"
+          },
+          {
+            "label": "_name",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:43"
+          },
+          {
+            "label": "_symbol",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "56",
+            "type": "t_array(t_uint256)45_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\ERC20Upgradeable.sol:400"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC20BurnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\token\\ERC20\\extensions\\ERC20BurnableUpgradeable.sol:51"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\access\\OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\ERC1967\\ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "burned",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_uint256",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:24"
+          },
+          {
+            "label": "isInitialized",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_bool",
             "contract": "BlueBird_ERC20",
             "src": "contracts\\BlueBird.sol:25"
           },

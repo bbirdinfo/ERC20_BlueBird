@@ -3,14 +3,19 @@
   "proxies": [
     {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0xb9b1a5b124e83433436cf29d87db052a75c699152c84b2c7045e45472d37c172",
+      "txHash": "0xe90fb6bbef57c7b016555f1ba4d6eb208cea1dce62645f6a84be86d49ec023b7",
+      "kind": "uups"
+    },
+    {
+      "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "txHash": "0x0a19a9d0a1c8045c6050df01086f74c05e3aceec43ea094323fb50da7930459e",
       "kind": "uups"
     }
   ],
   "impls": {
-    "41036e11591d150616446310fdbbe8f943875f6cdc53c1ba9b42a17671e9026a": {
+    "46a67d2b108ce75b4e5415ba9fb20f0471ee09d4352049ee02f4eca19dcab0f3": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "txHash": "0x91c182d04fa44e8ea88f9449e5925f3dc39156886e0066eb0dcac1fe0da306d8",
+      "txHash": "0x5f9e65c1f9f18bf589fff03f8aeffefaaab36b470738c8b23e1f7965b486a726",
       "layout": {
         "solcVersion": "0.8.9",
         "storage": [
@@ -128,18 +133,18 @@
             "src": "@openzeppelin\\contracts-upgradeable\\proxy\\utils\\UUPSUpgradeable.sol:107"
           },
           {
-            "label": "isInitialized",
-            "offset": 0,
-            "slot": "301",
-            "type": "t_bool",
-            "contract": "BlueBird_ERC20",
-            "src": "contracts\\BlueBird.sol:22"
-          },
-          {
             "label": "burned",
             "offset": 0,
-            "slot": "302",
+            "slot": "301",
             "type": "t_uint256",
+            "contract": "BlueBird_ERC20",
+            "src": "contracts\\BlueBird.sol:24"
+          },
+          {
+            "label": "isInitialized",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_bool",
             "contract": "BlueBird_ERC20",
             "src": "contracts\\BlueBird.sol:25"
           },

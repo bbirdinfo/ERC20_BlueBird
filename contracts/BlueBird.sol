@@ -14,15 +14,15 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  * @title BLUE BIRD ERC20
  * @author Samuele Chiesa
  * @notice The contract is write for Marco Liu, creator of BlueBird project. This code had the scope to create a new token ERC20
- * @dev The contract uses openzeppeling lib
+ * @dev The contract uses openzeppeling lib, is ERC20 and Upgradeable
  */
 contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
     /*--- COSTANTS ---*/
     uint private constant cap = 1000000000;
-    bool isInitialized;
 
     /*--- VARIABLES ---*/
     uint private burned;
+    bool private isInitialized;
     mapping (string=>uint256) public minter4amount;
     mapping (string=>uint256) public minter4minted;
     uint8[3] private miningPrice;
@@ -70,8 +70,9 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
 
     /*--- INIZIALIZE ---*/
     /**
-     * @dev In the constructor are define the mint cap for each entites and the mint state
-     * @param priceFeedAdd Address AggregatorV3Interface
+     * @dev  There is not constructor because the contract is upgradeable. The variable are defined in initialize (a one time function).
+     * @dev In the constinitalize are define the mint cap for each entites and the mint state.
+     * @param priceFeedAdd Address AggregatorV3Interface use to getting the price of Polygon in USD
      */ 
     function initialize(address priceFeedAdd) public initializer{
         require(!isInitialized, 'Contract is already initialized!');
@@ -98,13 +99,12 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
         _mint(msg.sender, cap*8/100*2/100*1e18);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
-
     /*--- FUNCTION ---*/
 
-    // AGGREGATOR UPGRADE
+    function _authorizeUpgrade(address newImplementation) internal onlyOwner override {}
+
     /**
-     * @notice AggregatorV3Interface upgrade allows to upgrade the contract from which we take the Matic/USD exchange rate  
+     * @notice aggregatorUpgrade allows to upgrade the contract from which we take the Matic/USD exchange rate  
      * @dev AggregatorV3Interface is the base of the mint from Matic
      * @param newpriceFeedAdd New address AggregatorV3Interface
      */ 
@@ -133,7 +133,7 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
      */ 
     // NB: il prezzo di mint dipende dal prezzo a cui si è arrivati nel momento del mint, 
     //      se un acquisto dovesse andare a cavallo su due 2 fasce di prezzo viene presa quella inferiore
-    function mintFromMatic() external virtual payable  noReentrant checkBalance(address(msg.sender).balance,msg.value) { //noReentrant(){
+    function mintFromMatic() external virtual payable noReentrant checkBalance(address(msg.sender).balance,msg.value) {
         uint value1 = msg.value;
         uint mintPrice;
         if(minter4minted["ecosystem"]<(cap*25/100*1e18)){
@@ -176,11 +176,6 @@ contract BlueBird_ERC20 is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
     function _mint(address account, uint256 amount) internal virtual override(ERC20Upgradeable) checkCap(amount) {
         super._mint(account, amount);
     }
-
-    // DESTROY FUNCTION
-/*    function destroy() public onlyOwner {
-        selfdestruct((payable (OwnableUpgradeable.owner())));
-    }*/
 
     //BURN FUNCTION
     /**
